@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0C1017">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bóveda">
+<link rel="apple-touch-icon" href="vault-icon-180.png">
+<title>Bóveda — Generador de contraseñas</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --bg:#0C1017; --surface:#141B26; --surface2:#1D2735; --border:#2A3648;
+  --text:#EAEEF5; --muted:#7C899E;
+  --steel:#4C82C3; --steel-bright:#63A6F0;
+  --amber:#E0A63C; --amber-bright:#F5BE52;
+  --danger:#E0574F; --ok:#4FC98A; --warn:#E0A63C;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+button,input{font-family:inherit;}
+#app{max-width:640px;margin:0 auto;padding:22px 16px 60px;min-height:100vh;}
+.disp{font-family:'Oswald',system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;}
+.mono{font-family:'JetBrains Mono',monospace;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:16px;}
+.row{display:flex;align-items:center;}
+.between{justify-content:space-between;}
+.gap8{gap:8px;} .gap12{gap:12px;}
+.muted{color:var(--muted);}
+.section-title{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1.5px;margin:0 0 14px;}
+
+/* header */
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+.brand-mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--surface2),var(--bg));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand h1{font-size:24px;margin:0;font-weight:700;}
+.brand p{font-size:11px;margin:1px 0 0;color:var(--muted);letter-spacing:1px;}
+
+/* output */
+.output{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:64px;}
+.output-text{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:500;word-break:break-all;line-height:1.35;flex:1;}
+.output-text .sym{color:var(--amber-bright);}
+.output-text .num{color:var(--steel-bright);}
+.icon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s,background .12s;flex-shrink:0;}
+.icon-btn:active{transform:scale(.92);}
+.icon-btn.copied{background:var(--ok);color:#062015;border-color:var(--ok);}
+
+/* strength meter */
+.meter{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden;margin-top:14px;}
+.meter-fill{height:100%;border-radius:3px;transition:width .3s ease,background .3s ease;}
+
+/* controls */
+.slider-row{margin-bottom:6px;}
+.len-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--amber-bright);}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--surface2);outline:none;margin:10px 0 4px;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--amber);border:3px solid var(--bg);cursor:pointer;box-shadow:0 0 0 1px var(--amber);}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--amber);border:3px solid var(--bg);cursor:pointer;}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:14px;}
+.toggle-label .ex{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-left:8px;}
+.switch{position:relative;width:46px;height:26px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider-sw{position:absolute;inset:0;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:.2s;}
+.slider-sw::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.2s;}
+.switch input:checked + .slider-sw{background:var(--steel);border-color:var(--steel-bright);}
+.switch input:checked + .slider-sw::before{transform:translateX(20px);background:#fff;}
+
+.btn-generate{width:100%;background:linear-gradient(135deg,var(--amber),var(--amber-bright));color:#241704;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:transform .12s,filter .12s;}
+.btn-generate:active{transform:scale(.98);}
+.btn-generate:hover{filter:brightness(1.05);}
+
+/* history */
+.hist-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.hist-pw{font-family:'JetBrains Mono',monospace;font-size:13px;word-break:break-all;flex:1;color:var(--muted);}
+.empty{color:var(--muted);font-size:12px;text-align:center;padding:16px 0;font-family:'JetBrains Mono',monospace;}
+.link-btn{background:none;border:none;color:var(--steel-bright);font-size:12px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
+.warn-banner{background:#2B1A16;border:1px solid var(--danger);color:#F5C4C0;border-radius:10px;padding:11px 13px;margin-bottom:16px;font-size:12px;line-height:1.5;font-family:'JetBrains Mono',monospace;}
+::-webkit-scrollbar{width:8px;} ::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:8px;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ---------- storage with fallback ---------- */
+let STORAGE_OK = true;
+const mem = {};
+(function(){ try{ const k='__t'+Date.now(); localStorage.setItem(k,'1'); STORAGE_OK = localStorage.getItem(k)==='1'; localStorage.removeItem(k);}catch(e){ STORAGE_OK=false; } })();
+function load(key,fb){ if(!STORAGE_OK) return key in mem?mem[key]:fb; try{const v=localStorage.getItem(key);return v!==null?JSON.parse(v):fb;}catch(e){return fb;} }
+function save(key,v){ mem[key]=v; if(!STORAGE_OK)return; try{localStorage.setItem(key,JSON.stringify(v));}catch(e){STORAGE_OK=false;} }
+
+/* ---------- state ---------- */
+const state = {
+  length: load('vault_len', 16),
+  opts: load('vault_opts', {lower:true, upper:true, num:true, sym:true}),
+  current: '',
+  history: load('vault_hist', []),
+  showHistory: load('vault_showhist', true),
+};
+
+const SETS = {
+  lower: 'abcdefghijklmnopqrstuvwxyz',
+  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+  num: '0123456789',
+  sym: '!@#$%^&*()-_=+[]{};:,.<>?',
+};
+
+/* ---------- secure random ---------- */
+function secureRandInt(max){
+  // uniforme sin sesgo usando crypto
+  const arr = new Uint32Array(1);
+  const limit = Math.floor(0xFFFFFFFF / max) * max;
+  let x;
+  do { crypto.getRandomValues(arr); x = arr[0]; } while(x >= limit);
+  return x % max;
+}
+function generate(){
+  let pool = '';
+  const active = [];
+  if(state.opts.lower){ pool += SETS.lower; active.push(SETS.lower); }
+  if(state.opts.upper){ pool += SETS.upper; active.push(SETS.upper); }
+  if(state.opts.num){ pool += SETS.num; active.push(SETS.num); }
+  if(state.opts.sym){ pool += SETS.sym; active.push(SETS.sym); }
+  if(!pool){ return ''; }
+
+  const len = state.length;
+  const chars = [];
+  // garantizar al menos un caracter de cada set activo (si cabe)
+  active.forEach(set=>{ if(chars.length < len) chars.push(set[secureRandInt(set.length)]); });
+  while(chars.length < len){ chars.push(pool[secureRandInt(pool.length)]); }
+  // barajar (Fisher-Yates con crypto)
+  for(let i=chars.length-1;i>0;i--){ const j=secureRandInt(i+1); [chars[i],chars[j]]=[chars[j],chars[i]]; }
+  return chars.join('');
+}
+
+/* ---------- strength (basado en entropía) ---------- */
+function poolSize(){
+  let n=0;
+  if(state.opts.lower)n+=26; if(state.opts.upper)n+=26;
+  if(state.opts.num)n+=10; if(state.opts.sym)n+=24;
+  return n;
+}
+function entropyBits(){
+  const n = poolSize();
+  if(n<=1) return 0;
+  return Math.round(state.length * Math.log2(n));
+}
+function strengthInfo(){
+  const bits = entropyBits();
+  if(bits < 40) return {label:'Débil', color:'var(--danger)', pct:25};
+  if(bits < 60) return {label:'Aceptable', color:'var(--warn)', pct:50};
+  if(bits < 80) return {label:'Fuerte', color:'var(--steel-bright)', pct:75};
+  return {label:'Muy fuerte', color:'var(--ok)', pct:100};
+}
+
+/* ---------- render helpers ---------- */
+function colorize(pw){
+  return pw.split('').map(c=>{
+    if(/[0-9]/.test(c)) return `<span class="num">${escapeHtml(c)}</span>`;
+    if(/[a-zA-Z]/.test(c)) return escapeHtml(c);
+    return `<span class="sym">${escapeHtml(c)}</span>`;
+  }).join('');
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const ICO_COPY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
+const ICO_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
+const ICO_REFRESH = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0114.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0020.5 15"/></svg>';
+const ICO_TRASH = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>';
+const ICO_LOCK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber-bright)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>';
+
+function render(){
+  const s = strengthInfo();
+  const optRows = [
+    {key:'lower', label:'Minúsculas', ex:'a-z'},
+    {key:'upper', label:'Mayúsculas', ex:'A-Z'},
+    {key:'num', label:'Números', ex:'0-9'},
+    {key:'sym', label:'Símbolos', ex:'!@#$'},
+  ];
+  document.getElementById('app').innerHTML = `
+    ${!STORAGE_OK ? `<div class="warn-banner">⚠ El historial no se guardará permanentemente en este contexto (se pierde al recargar). Funciona bien al abrir la página desde su URL de GitHub Pages.</div>` : ''}
+    <div class="brand">
+      <div class="brand-mark">${ICO_LOCK}</div>
+      <div>
+        <h1 class="disp">Bóveda</h1>
+        <p>GENERADOR DE CONTRASEÑAS SEGURAS</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="output">
+        <div class="output-text" id="outText">${state.current ? colorize(state.current) : '<span class="muted">Pulsa generar…</span>'}</div>
+        <button class="icon-btn" id="copyBtn" title="Copiar" ${state.current?'':'disabled'}>${ICO_COPY}</button>
+        <button class="icon-btn" data-action="regen" title="Regenerar">${ICO_REFRESH}</button>
+      </div>
+      <div class="meter"><div class="meter-fill" style="width:${state.current?s.pct:0}%;background:${s.color};"></div></div>
+      <div class="row between" style="margin-top:6px;">
+        <span class="mono" style="font-size:11px;color:${s.color};">${state.current?s.label:'—'}</span>
+        <span class="mono" style="font-size:11px;color:var(--muted);">${entropyBits()} bits de entropía</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="section-title">LONGITUD</p>
+      <div class="row between slider-row">
+        <span class="mono muted" style="font-size:12px;">Caracteres</span>
+        <span class="len-val">${state.length}</span>
+      </div>
+      <input type="range" id="lenRange" min="4" max="48" value="${state.length}">
+      <div class="row between mono" style="font-size:10px;color:var(--muted);">
+        <span>4</span><span>48</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="section-title">INCLUIR</p>
+      ${optRows.map(o=>`
+        <div class="toggle-row">
+          <span class="toggle-label">${o.label}<span class="ex">${o.ex}</span></span>
+          <label class="switch">
+            <input type="checkbox" data-opt="${o.key}" ${state.opts[o.key]?'checked':''}>
+            <span class="slider-sw"></span>
+          </label>
+        </div>`).join('')}
+    </div>
+
+    <button class="btn-generate disp" data-action="generate">Generar contraseña</button>
+
+    <div class="card" style="margin-top:16px;">
+      <div class="row between" style="margin-bottom:${state.showHistory?'14px':'0'};">
+        <p class="section-title" style="margin:0;">HISTORIAL RECIENTE</p>
+        <div class="row gap12">
+          <button class="link-btn" data-action="toggleHist">${state.showHistory?'ocultar':'mostrar'}</button>
+          ${state.history.length?`<button class="link-btn" data-action="clearHist" style="color:var(--danger);">limpiar</button>`:''}
+        </div>
+      </div>
+      ${state.showHistory ? (state.history.length===0
+        ? `<p class="empty">Las contraseñas que generes aparecerán aquí.</p>`
+        : state.history.map((pw,i)=>`
+          <div class="hist-item">
+            <span class="hist-pw">${escapeHtml(pw)}</span>
+            <button class="icon-btn" data-action="copyHist" data-idx="${i}" style="padding:6px;">${ICO_COPY}</button>
+            <button class="icon-btn" data-action="delHist" data-idx="${i}" style="padding:6px;color:var(--danger);border-color:var(--border);">${ICO_TRASH}</button>
+          </div>`).join('')
+      ) : ''}
+    </div>
+
+    <p class="mono" style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.6;">
+      Generadas con crypto.getRandomValues (aleatoriedad criptográfica).<br>Todo ocurre en tu dispositivo — nada se envía a ningún servidor.
+    </p>
+  `;
+  attachControls();
+}
+
+function attachControls(){
+  const lenRange = document.getElementById('lenRange');
+  if(lenRange){
+    lenRange.addEventListener('input', (e)=>{
+      state.length = Number(e.target.value);
+      save('vault_len', state.length);
+      // actualizar solo el numero y meter sin re-render completo (mantiene drag suave)
+      document.querySelector('.len-val').textContent = state.length;
+    });
+    lenRange.addEventListener('change', ()=> render());
+  }
+  document.querySelectorAll('[data-opt]').forEach(chk=>{
+    chk.addEventListener('change', (e)=>{
+      const key = e.target.dataset.opt;
+      const checked = e.target.checked;
+      // no permitir desactivar el último set activo
+      const activeCount = Object.values(state.opts).filter(Boolean).length;
+      if(!checked && activeCount<=1){ e.target.checked = true; return; }
+      state.opts[key] = checked;
+      save('vault_opts', state.opts);
+      render();
+    });
+  });
+  const copyBtn = document.getElementById('copyBtn');
+  if(copyBtn && state.current){
+    copyBtn.addEventListener('click', ()=> copyText(state.current, copyBtn));
+  }
+}
+
+function copyText(text, btnEl){
+  const done = ()=>{
+    if(btnEl){ btnEl.classList.add('copied'); btnEl.innerHTML = ICO_CHECK;
+      setTimeout(()=>{ btnEl.classList.remove('copied'); btnEl.innerHTML = ICO_COPY; }, 1200); }
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
+  } else { fallbackCopy(text, done); }
+}
+function fallbackCopy(text, cb){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); cb&&cb(); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+document.addEventListener('click', (e)=>{
+  const btn = e.target.closest('[data-action]');
+  if(!btn) return;
+  const a = btn.dataset.action;
+  if(a==='generate' || a==='regen'){
+    const pw = generate();
+    if(!pw) return;
+    state.current = pw;
+    state.history.unshift(pw);
+    if(state.history.length>10) state.history = state.history.slice(0,10);
+    save('vault_hist', state.history);
+    render();
+  }
+  else if(a==='toggleHist'){ state.showHistory=!state.showHistory; save('vault_showhist',state.showHistory); render(); }
+  else if(a==='clearHist'){ state.history=[]; save('vault_hist',[]); render(); }
+  else if(a==='copyHist'){ copyText(state.history[Number(btn.dataset.idx)], btn); }
+  else if(a==='delHist'){ state.history.splice(Number(btn.dataset.idx),1); save('vault_hist',state.history); render(); }
+});
+
+render();
+</script>
+</body>
+</html>
