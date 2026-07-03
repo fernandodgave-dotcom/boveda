@@ -7,11 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bóveda">
+<link rel="icon" type="image/png" href="vault-icon-192.png">
 <link rel="apple-touch-icon" href="vault-icon-180.png">
-<title>Bóveda — Generador de contraseñas</title>
+<title>Bóveda — Contraseñas seguras</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap');
-
 :root{
   --bg:#0C1017; --surface:#141B26; --surface2:#1D2735; --border:#2A3648;
   --text:#EAEEF5; --muted:#7C899E;
@@ -20,7 +20,13 @@
   --danger:#E0574F; --ok:#4FC98A; --warn:#E0A63C;
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-tap-highlight-color:transparent;
+  background:
+    radial-gradient(circle at 50% -10%, #2a0a10, transparent 55%),
+    radial-gradient(circle at 100% 100%, #1a0508, transparent 45%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,.18) 0 6px, transparent 6px 12px),
+    #0b0406;
+  background-attachment:fixed;}
 button,input{font-family:inherit;}
 #app{max-width:640px;margin:0 auto;padding:22px 16px 60px;min-height:100vh;}
 .disp{font-family:'Oswald',system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase;}
@@ -31,14 +37,14 @@ button,input{font-family:inherit;}
 .gap8{gap:8px;} .gap12{gap:12px;}
 .muted{color:var(--muted);}
 .section-title{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1.5px;margin:0 0 14px;}
-
-/* header */
-.brand{display:flex;align-items:center;gap:12px;margin-bottom:22px;}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
 .brand-mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--surface2),var(--bg));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.brand h1{font-size:24px;margin:0;font-weight:700;}
+.brand h1{font-size:24px;margin:0;font-weight:700;background:linear-gradient(180deg,#ffe89a,#c99a3a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5));}
 .brand p{font-size:11px;margin:1px 0 0;color:var(--muted);letter-spacing:1px;}
-
-/* output */
+.tabbar{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:4px;margin-bottom:18px;}
+.tab{flex:1;background:transparent;border:none;border-radius:9px;padding:11px;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.tab.active{background:var(--surface2);color:var(--text);}
+.tab.active.vault-tab{color:var(--amber-bright);}
 .output{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:16px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:64px;}
 .output-text{font-family:'JetBrains Mono',monospace;font-size:19px;font-weight:500;word-break:break-all;line-height:1.35;flex:1;}
 .output-text .sym{color:var(--amber-bright);}
@@ -46,18 +52,12 @@ button,input{font-family:inherit;}
 .icon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s,background .12s;flex-shrink:0;}
 .icon-btn:active{transform:scale(.92);}
 .icon-btn.copied{background:var(--ok);color:#062015;border-color:var(--ok);}
-
-/* strength meter */
 .meter{height:6px;border-radius:3px;background:var(--surface2);overflow:hidden;margin-top:14px;}
 .meter-fill{height:100%;border-radius:3px;transition:width .3s ease,background .3s ease;}
-
-/* controls */
-.slider-row{margin-bottom:6px;}
 .len-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--amber-bright);}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--surface2);outline:none;margin:10px 0 4px;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:var(--amber);border:3px solid var(--bg);cursor:pointer;box-shadow:0 0 0 1px var(--amber);}
 input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--amber);border:3px solid var(--bg);cursor:pointer;}
-
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--border);}
 .toggle-row:last-child{border-bottom:none;}
 .toggle-label{font-size:14px;}
@@ -66,259 +66,817 @@ input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;bac
 .switch input{opacity:0;width:0;height:0;}
 .slider-sw{position:absolute;inset:0;background:var(--surface2);border:1px solid var(--border);border-radius:20px;cursor:pointer;transition:.2s;}
 .slider-sw::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:3px;background:var(--muted);border-radius:50%;transition:.2s;}
-.switch input:checked + .slider-sw{background:var(--steel);border-color:var(--steel-bright);}
+.switch input:checked + .slider-sw{background:linear-gradient(180deg,#e0a63c,#b9832a);border-color:#ffe89a;}
 .switch input:checked + .slider-sw::before{transform:translateX(20px);background:#fff;}
-
 .btn-generate{width:100%;background:linear-gradient(135deg,var(--amber),var(--amber-bright));color:#241704;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:transform .12s,filter .12s;}
 .btn-generate:active{transform:scale(.98);}
-.btn-generate:hover{filter:brightness(1.05);}
-
-/* history */
-.hist-item{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
-.hist-pw{font-family:'JetBrains Mono',monospace;font-size:13px;word-break:break-all;flex:1;color:var(--muted);}
-.empty{color:var(--muted);font-size:12px;text-align:center;padding:16px 0;font-family:'JetBrains Mono',monospace;}
+/* ===== estilo CASINO para el generador ===== */
+.casino-card{background:radial-gradient(circle at 50% 0%,#3a0d12,#1c0508 70%);border:2px solid #c99a3a;border-radius:18px;padding:18px;margin-bottom:16px;position:relative;box-shadow:0 8px 30px rgba(0,0,0,.5),inset 0 0 40px rgba(201,154,58,.08);overflow:hidden;}
+.casino-card::before{content:'';position:absolute;inset:6px;border:1px solid rgba(201,154,58,.4);border-radius:12px;pointer-events:none;}
+/* bombillas alrededor */
+.bulbs{position:absolute;top:0;left:0;right:0;height:8px;display:flex;justify-content:space-around;padding:0 12px;z-index:2;}
+.bulb{width:6px;height:6px;border-radius:50%;background:#ffd86b;box-shadow:0 0 6px #ffcf4d,0 0 10px #ffb300;animation:bulbBlink 1.2s infinite;}
+.bulb:nth-child(2n){animation-delay:.3s;background:#ff5b52;box-shadow:0 0 6px #ff5b52;}
+.bulb:nth-child(3n){animation-delay:.6s;}
+@keyframes bulbBlink{0%,100%{opacity:1;}50%{opacity:.3;}}
+.casino-title{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:13px;font-weight:700;text-align:center;margin:8px 0 14px;
+  background:linear-gradient(180deg,#ffe89a,#c99a3a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 1px 1px rgba(0,0,0,.5));}
+/* pantalla de rodillos */
+.reels{background:linear-gradient(180deg,#0a0604,#160a06);border:2px solid #c99a3a;border-radius:10px;padding:14px 10px;min-height:70px;display:flex;flex-wrap:wrap;gap:3px;align-items:center;justify-content:center;box-shadow:inset 0 3px 12px rgba(0,0,0,.8),inset 0 0 0 1px rgba(0,0,0,.6);position:relative;}
+.reels::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(201,154,58,.25);pointer-events:none;}
+.reel-char{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;width:20px;text-align:center;color:#ffe89a;text-shadow:0 0 8px rgba(255,207,77,.6);display:inline-block;}
+.reel-char.num{color:#7ad0ff;text-shadow:0 0 8px rgba(122,208,255,.6);}
+.reel-char.sym{color:#ff7b6e;text-shadow:0 0 8px rgba(255,123,110,.6);}
+.reel-char.spinning{animation:reelSpin .08s steps(2) infinite;color:#ffcf4d;}
+@keyframes reelSpin{0%{transform:translateY(-3px);opacity:.6;}100%{transform:translateY(3px);opacity:1;}}
+.reels .placeholder{color:#6b4a1e;font-family:'Oswald',sans-serif;letter-spacing:2px;text-transform:uppercase;font-size:13px;}
+/* linea de segmento con boton propio */
+.reel-line{display:flex;gap:8px;align-items:stretch;margin-bottom:8px;}
+.reels-seg{flex:1;min-height:48px;padding:10px 8px;}
+.seg-spin{width:52px;flex-shrink:0;border:2px solid #c99a3a;border-radius:10px;cursor:pointer;font-size:20px;
+  background:linear-gradient(180deg,#ffe89a,#e0a63c 55%,#b9832a);
+  box-shadow:0 3px 0 #7a5518,inset 0 1px 0 rgba(255,255,255,.5);
+  transition:transform .1s,box-shadow .1s;display:flex;align-items:center;justify-content:center;}
+.seg-spin:hover{filter:brightness(1.06);}
+.seg-spin:active{transform:translateY(3px);box-shadow:0 0 0 #7a5518,inset 0 1px 0 rgba(255,255,255,.5);}
+/* fila de acciones casino */
+.casino-actions{display:flex;gap:8px;margin-top:12px;}
+.casino-actions .icon-btn{background:linear-gradient(145deg,#2a1508,#1a0d05);border:1px solid #c99a3a;color:#ffe89a;}
+.casino-actions .icon-btn.copied{background:var(--ok);color:#062015;border-color:var(--ok);}
+/* medidor tipo fichas */
+.chip-meter{display:flex;gap:5px;margin-top:14px;align-items:center;justify-content:center;}
+.chip{width:14px;height:14px;border-radius:50%;border:2px dashed rgba(255,255,255,.4);background:#333;transition:.2s;}
+.chip.on{border-style:solid;}
+/* palanca / boton spin */
+.btn-spin{width:100%;margin-top:4px;padding:17px;border:none;border-radius:14px;cursor:pointer;
+  font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:17px;font-weight:700;color:#3a0808;
+  background:linear-gradient(180deg,#ffe89a,#e0a63c 55%,#b9832a);
+  box-shadow:0 5px 0 #7a5518,0 8px 14px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5);
+  transition:transform .1s,box-shadow .1s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn-spin:hover{filter:brightness(1.05);}
+.btn-spin:active{transform:translateY(4px);box-shadow:0 1px 0 #7a5518,0 2px 6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.5);}
+.btn-spin.spinning{pointer-events:none;opacity:.85;}
+.casino-stats{display:flex;justify-content:space-between;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11px;}
+/* tarjetas de configuración estilo casino */
+.cfg-card{background:linear-gradient(160deg,#1e0a0e,#120508);border:1px solid #7a5518;border-radius:14px;padding:16px;margin-bottom:16px;box-shadow:0 4px 16px rgba(0,0,0,.4),inset 0 0 0 1px rgba(201,154,58,.15);}
+.cfg-title{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:12px;font-weight:700;margin:0 0 12px;
+  background:linear-gradient(180deg,#ffe89a,#c99a3a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.btn-save{width:100%;background:transparent;border:1px solid var(--amber);color:var(--amber-bright);border-radius:12px;padding:13px;font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.5px;margin-top:10px;transition:.12s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-save:active{transform:scale(.98);}
+.btn-save:disabled{opacity:.4;cursor:not-allowed;}
+.btn-vault-enter{width:100%;margin-top:22px;background:linear-gradient(135deg,#1a2230,#0e1420);border:1px solid var(--amber);color:var(--amber-bright);border-radius:14px;padding:16px;font-family:'Oswald',sans-serif;font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .12s,box-shadow .15s,background .15s;box-shadow:0 0 0 rgba(245,190,82,0);}
+.btn-vault-enter:hover{background:linear-gradient(135deg,#212b3c,#131b28);box-shadow:0 0 18px rgba(245,190,82,.25);}
+.btn-vault-enter:active{transform:scale(.98);}
+.empty{color:var(--muted);font-size:12px;text-align:center;padding:16px 0;font-family:'JetBrains Mono',monospace;line-height:1.6;}
 .link-btn{background:none;border:none;color:var(--steel-bright);font-size:12px;cursor:pointer;font-family:'JetBrains Mono',monospace;}
 .warn-banner{background:#2B1A16;border:1px solid var(--danger);color:#F5C4C0;border-radius:10px;padding:11px 13px;margin-bottom:16px;font-size:12px;line-height:1.5;font-family:'JetBrains Mono',monospace;}
+.vault-item{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+.vault-item .label{font-size:14px;font-weight:600;margin-bottom:6px;}
+.vault-pw{font-family:'JetBrains Mono',monospace;font-size:14px;word-break:break-all;color:var(--amber-bright);flex:1;}
+.vault-pw.hidden{color:var(--muted);letter-spacing:2px;}
+.pin-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center;animation:pinEnter .4s cubic-bezier(.2,.8,.2,1);position:relative;padding:30px 0;border-radius:18px;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(120,140,90,.12), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(0,0,0,.14) 0 3px, transparent 3px 8px),
+    linear-gradient(160deg, #2a2f22, #171a13 60%, #0e100b);
+  box-shadow:inset 0 0 90px rgba(0,0,0,.7), inset 0 2px 0 rgba(255,255,255,.04);
+  overflow:hidden;}
+.pin-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:
+    radial-gradient(circle at 15% 25%, rgba(90,105,70,.35) 0 40px, transparent 42px),
+    radial-gradient(circle at 78% 15%, rgba(60,72,48,.4) 0 55px, transparent 57px),
+    radial-gradient(circle at 60% 78%, rgba(80,92,60,.3) 0 60px, transparent 62px),
+    radial-gradient(circle at 30% 85%, rgba(50,60,40,.4) 0 48px, transparent 50px);
+  filter:blur(2px);}
+.pin-wrap > *{position:relative;z-index:1;}
+.pin-wrap::after{content:'';position:absolute;inset:10px;border:2px solid rgba(0,0,0,.35);border-radius:14px;pointer-events:none;z-index:0;box-shadow:inset 0 0 0 1px rgba(160,180,120,.08);}
+@keyframes pinEnter{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.pin-wrap.success{animation:pinSuccess .5s ease forwards;}
+@keyframes pinSuccess{0%{opacity:1;transform:scale(1);}60%{transform:scale(1.03);}100%{opacity:0;transform:scale(1.12);}}
+.pin-wrap.wrath{animation:wrath .5s cubic-bezier(.36,.07,.19,.97);}
+@keyframes wrath{0%,100%{transform:translateX(0);}10%{transform:translateX(-14px) rotate(-1deg);}30%{transform:translateX(13px) rotate(1deg);}50%{transform:translateX(-10px);}70%{transform:translateX(8px);}85%{transform:translateX(-4px);}}
+
+.pin-lock{width:68px;height:68px;border-radius:18px;background:linear-gradient(135deg,var(--surface2),var(--bg));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;margin-bottom:20px;position:relative;animation:lockFloat 3s ease-in-out infinite;}
+@keyframes lockFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+.pin-lock::after{content:'';position:absolute;inset:-4px;border-radius:20px;border:1px solid var(--amber);opacity:0;animation:lockRing 3s ease-in-out infinite;}
+@keyframes lockRing{0%,100%{opacity:0;transform:scale(1);}50%{opacity:.35;transform:scale(1.08);}}
+.pin-lock.unlocked{animation:lockPop .5s ease forwards;}
+@keyframes lockPop{0%{transform:scale(1);}40%{transform:scale(1.25) rotate(-8deg);}100%{transform:scale(1) rotate(0);}}
+
+.pin-title{font-family:'Oswald',sans-serif;font-size:22px;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;}
+.pin-sub{font-size:13px;color:var(--muted);margin:0 0 24px;max-width:340px;line-height:1.5;}
+
+/* consola integrada: pantalla + teclado en un solo bloque */
+.console-unit{background:linear-gradient(150deg,#2f3742,#1a2027);border:2px solid #0a0d12;border-radius:22px;padding:16px;box-shadow:0 12px 34px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.07),inset 0 -3px 8px rgba(0,0,0,.6);display:inline-block;}
+/* display tipo pantalla de caja fuerte */
+.pin-screen{
+  width:100%;max-width:270px;margin:0 auto 16px;padding:14px 16px;border-radius:8px;
+  background:linear-gradient(180deg,#0a1410,#050a07);
+  border:3px solid #0a0d12;
+  box-shadow:0 4px 12px rgba(0,0,0,.7),inset 0 2px 10px rgba(0,0,0,.85),inset 0 0 0 1px rgba(80,255,160,.06),inset 0 0 22px rgba(40,120,70,.12);
+  position:relative;overflow:hidden;
+}
+.pin-screen::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.15) 0 1px,transparent 1px 3px);opacity:.5;}
+.pin-screen::after{content:'';position:absolute;top:0;left:0;right:0;height:40%;pointer-events:none;
+  background:linear-gradient(180deg,rgba(120,255,180,.06),transparent);}
+.screen-status{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:rgba(120,255,180,.5);text-transform:uppercase;margin-bottom:6px;display:flex;justify-content:space-between;}
+.screen-status .rec{display:flex;align-items:center;gap:4px;}
+.screen-status .rec::before{content:'';width:6px;height:6px;border-radius:50%;background:#4dff9e;box-shadow:0 0 6px #4dff9e;animation:blink 1.4s infinite;}
+@keyframes blink{0%,60%{opacity:1;}80%,100%{opacity:.2;}}
+.screen-digits{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:700;letter-spacing:8px;color:#4dff9e;text-shadow:0 0 8px rgba(77,255,158,.7);text-align:center;line-height:1;min-height:40px;display:flex;align-items:center;justify-content:center;}
+.screen-digits .cell{display:inline-block;width:22px;text-align:center;color:rgba(77,255,158,.18);transition:color .15s,text-shadow .15s;}
+.screen-digits .cell.on{color:#4dff9e;text-shadow:0 0 10px rgba(77,255,158,.9);animation:cellPop .2s ease;}
+@keyframes cellPop{0%{transform:scale(.6);}60%{transform:scale(1.25);}100%{transform:scale(1);}}
+.pin-screen.warn1{border-color:#5a3a12;box-shadow:0 4px 12px rgba(0,0,0,.7),inset 0 0 24px rgba(240,150,40,.4),0 0 20px rgba(240,150,40,.4);animation:shake .4s cubic-bezier(.36,.07,.19,.97);}
+.pin-screen.warn1 .screen-digits,.pin-screen.warn1 .screen-digits .cell.on{color:#ff9d33;text-shadow:0 0 12px rgba(255,157,51,.9);}
+.pin-screen.warn1 .screen-status{color:rgba(255,157,51,.7);}
+.pin-screen.warn1 .screen-status .rec::before{background:#ff9d33;box-shadow:0 0 6px #ff9d33;}
+.pin-screen.error{border-color:#5a1512;box-shadow:0 6px 16px rgba(0,0,0,.6),inset 0 0 24px rgba(224,87,79,.4),0 0 20px rgba(224,87,79,.35);animation:shake .4s cubic-bezier(.36,.07,.19,.97);}
+.pin-screen.error .screen-digits,.pin-screen.error .screen-digits .cell.on{color:#ff5b52;text-shadow:0 0 12px rgba(255,91,82,.9);}
+.pin-screen.error .screen-status{color:rgba(255,91,82,.6);}
+.pin-screen.error .screen-status .rec::before{background:#ff5b52;box-shadow:0 0 6px #ff5b52;}
+.pin-screen.ok{border-color:#14502f;box-shadow:0 6px 16px rgba(0,0,0,.6),inset 0 0 24px rgba(79,201,138,.4),0 0 20px rgba(79,201,138,.4);}
+.pin-screen.ok .screen-digits .cell{color:#4fc98a;text-shadow:0 0 12px rgba(79,201,138,.9);}
+.pin-screen.locked{border-color:#3d1a55;background:linear-gradient(180deg,#150a1e,#0a0510);box-shadow:0 6px 16px rgba(0,0,0,.6),inset 0 0 30px rgba(160,92,208,.5),0 0 24px rgba(160,92,208,.5);}
+.pin-screen.locked .screen-digits,.pin-screen.locked .screen-digits .cell{color:#c58ee8;text-shadow:0 0 14px rgba(197,142,232,.9);}
+.pin-screen.locked .screen-status{color:rgba(197,142,232,.6);}
+.pin-screen.locked .screen-status .rec::before{background:#c58ee8;box-shadow:0 0 6px #c58ee8;}
+
+/* teclado tipo bóveda: placa de acero con relieves */
+.keypad-plate{padding:4px;border-radius:12px;background:transparent;border:none;box-shadow:none;position:relative;}
+.console-unit{position:relative;}
+.console-unit .screw{position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#6b7686,#252b34);box-shadow:0 1px 2px rgba(0,0,0,.7),inset 0 0 0 1px rgba(0,0,0,.3);}
+.console-unit .screw.tl{top:9px;left:9px;} .console-unit .screw.tr{top:9px;right:9px;}
+.console-unit .screw.bl{bottom:9px;left:9px;} .console-unit .screw.br{bottom:9px;right:9px;}
+.keypad-plate::before{content:none;}
+.keypad-plate::after{content:none;}
+.keypad{display:grid;grid-template-columns:repeat(3,74px);gap:14px;}
+.key{width:74px;height:74px;border-radius:14px;
+  background:linear-gradient(145deg,#3a434f,#20272f);
+  border:1px solid #10141a;
+  color:#dfe5ee;font-size:26px;font-family:'JetBrains Mono',monospace;font-weight:700;cursor:pointer;
+  transition:transform .08s ease,box-shadow .1s ease,background .1s;
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;-webkit-user-select:none;user-select:none;
+  box-shadow:0 4px 0 #12161c,0 5px 8px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.12);
+  text-shadow:0 1px 1px rgba(0,0,0,.6);
+}
+.key:hover{background:linear-gradient(145deg,#424c59,#252d36);}
+.key:active,.key.pressed{transform:translateY(4px);box-shadow:0 0 0 #12161c,0 1px 3px rgba(0,0,0,.5),inset 0 2px 5px rgba(0,0,0,.5);background:linear-gradient(145deg,#2b333d,#1a2028);}
+.key .ripple{position:absolute;border-radius:50%;background:rgba(245,190,82,.4);transform:scale(0);animation:ripple .5s ease-out;pointer-events:none;}
+@keyframes ripple{to{transform:scale(2.6);opacity:0;}}
+.key.action{font-size:12px;font-family:'Inter',sans-serif;font-weight:600;color:#9aa5b5;
+  background:linear-gradient(145deg,#2a313b,#191f26);box-shadow:0 3px 0 #10141a,0 4px 6px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.06);}
+.key.action:active{transform:translateY(3px);box-shadow:0 0 0 #10141a,inset 0 2px 4px rgba(0,0,0,.5);}
+
+/* estado bloqueado: malla + candado */
+.keypad-wrap{position:relative;display:inline-block;}
+.keypad-wrap.locked .keypad-plate{filter:grayscale(.4) brightness(.6);pointer-events:none;}
+.mesh{position:absolute;inset:-8px;border-radius:22px;pointer-events:none;opacity:0;z-index:5;
+  background-image:repeating-linear-gradient(45deg,rgba(160,92,208,.55) 0 2px,transparent 2px 13px),repeating-linear-gradient(-45deg,rgba(160,92,208,.55) 0 2px,transparent 2px 13px);
+  transition:opacity .4s ease;}
+.keypad-wrap.locked .mesh{opacity:1;animation:meshDrop .5s ease;}
+@keyframes meshDrop{0%{transform:translateY(-30px);opacity:0;}100%{transform:translateY(0);opacity:1;}}
+.mesh-lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:6;opacity:0;pointer-events:none;}
+.keypad-wrap.locked .mesh-lock{opacity:1;animation:lockSlam .5s cubic-bezier(.3,1.6,.5,1);}
+@keyframes lockSlam{0%{transform:scale(2.4) translateY(-40px);opacity:0;}60%{transform:scale(.85);opacity:1;}100%{transform:scale(1);opacity:1;}}
+.mesh-lock svg{filter:drop-shadow(0 4px 10px rgba(0,0,0,.7));}
+/* carita diabólica que se ríe de ti */
+.demon-overlay{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(8,4,4,.92);backdrop-filter:blur(3px);animation:demonFade .3s ease;}
+/* animacion puerta de boveda abriendose */
+.vault-door{position:fixed;inset:0;z-index:70;pointer-events:none;overflow:hidden;}
+.vault-door .leaf{position:absolute;top:0;bottom:0;width:52%;background:linear-gradient(145deg,#2f3742,#12171e);display:flex;align-items:center;justify-content:center;}
+.vault-door .leaf.left{left:0;border-right:3px solid #0a0d12;box-shadow:inset -8px 0 20px rgba(0,0,0,.6),8px 0 30px rgba(0,0,0,.5);animation:doorLeft 1.15s cubic-bezier(.6,0,.3,1) forwards;}
+.vault-door .leaf.right{right:0;border-left:3px solid #0a0d12;box-shadow:inset 8px 0 20px rgba(0,0,0,.6),-8px 0 30px rgba(0,0,0,.5);animation:doorRight 1.15s cubic-bezier(.6,0,.3,1) forwards;}
+@keyframes doorLeft{0%{transform:translateX(0);}20%{transform:translateX(0);}100%{transform:translateX(-102%);}}
+@keyframes doorRight{0%{transform:translateX(0);}20%{transform:translateX(0);}100%{transform:translateX(102%);}}
+/* volante/rueda giratoria de la boveda en la hoja izquierda */
+.vault-wheel{position:absolute;right:-42px;top:50%;transform:translateY(-50%);animation:wheelSpin 1.15s cubic-bezier(.5,0,.4,1) forwards;}
+@keyframes wheelSpin{0%{transform:translateY(-50%) rotate(0);}20%{transform:translateY(-50%) rotate(140deg);}100%{transform:translateY(-50%) rotate(160deg);}}
+.vault-rivets{position:absolute;inset:14px;border:2px dashed rgba(120,140,90,.15);border-radius:8px;pointer-events:none;}
+.vault-flash{position:fixed;inset:0;z-index:69;background:radial-gradient(circle at center,rgba(245,190,82,.5),transparent 55%);opacity:0;pointer-events:none;animation:vaultFlash 1.15s ease forwards;}
+@keyframes vaultFlash{0%{opacity:0;}18%{opacity:.9;}45%{opacity:.3;}100%{opacity:0;}}
+@keyframes demonFade{from{opacity:0;}to{opacity:1;}}
+.demon-face{animation:demonLaugh 1.8s ease;transform-origin:center;}
+@keyframes demonLaugh{
+  0%{transform:scale(0) rotate(-14deg);opacity:0;}
+  22%{transform:scale(1.28) rotate(5deg);opacity:1;}
+  34%{transform:scale(1.14) translateY(-4px) rotate(-4deg);}
+  46%{transform:scale(1.26) translateY(2px) rotate(4deg);}
+  58%{transform:scale(1.14) translateY(-3px) rotate(-3deg);}
+  70%{transform:scale(1.24) translateY(2px) rotate(3deg);}
+  82%{transform:scale(1.16) translateY(-2px) rotate(-2deg);}
+  100%{transform:scale(1.2) rotate(0);}
+}
+.demon-face svg{filter:drop-shadow(0 0 24px rgba(255,40,40,.55));width:170px;height:auto;}
+/* mandibula abriendose y cerrandose como risa */
+.demon-face .jaw{transform-origin:60px 116px;animation:jawLaugh .32s ease-in-out infinite;}
+@keyframes jawLaugh{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(10px) rotate(4deg);}}
+.demon-text{font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:22px;letter-spacing:2px;color:#ff4d4d;text-shadow:0 0 14px rgba(255,60,60,.7);margin-top:18px;animation:demonTextIn .5s ease .4s both;}
+@keyframes demonTextIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+/* frase flotante que cae al centro */
+.float-phrase{position:fixed;left:50%;top:38%;transform:translateX(-50%);z-index:60;font-family:'Oswald',sans-serif;text-transform:uppercase;font-size:26px;letter-spacing:1.5px;font-weight:700;text-align:center;pointer-events:none;padding:0 20px;}
+.float-phrase.orange{color:#ff9d33;text-shadow:0 0 18px rgba(255,157,51,.8);animation:phraseDrop 2s cubic-bezier(.3,1.3,.5,1) forwards;}
+.float-phrase.red{color:#ff4d4d;text-shadow:0 0 18px rgba(255,77,77,.8);animation:phraseDrop 2s cubic-bezier(.3,1.3,.5,1) forwards;}
+.float-phrase.purple{color:#c58ee8;text-shadow:0 0 20px rgba(197,142,232,.9);font-size:34px;animation:phraseSlam 1.6s cubic-bezier(.3,1.4,.5,1) forwards;}
+@keyframes phraseDrop{0%{opacity:0;transform:translateX(-50%) translateY(-60px) scale(.7);}20%{opacity:1;transform:translateX(-50%) translateY(0) scale(1.1);}30%{transform:translateX(-50%) translateY(6px) scale(1);}80%{opacity:1;transform:translateX(-50%) translateY(6px) scale(1);}100%{opacity:0;transform:translateX(-50%) translateY(-14px) scale(.95);}}
+@keyframes phraseSlam{0%{opacity:0;transform:translateX(-50%) scale(2.6);}45%{opacity:1;transform:translateX(-50%) scale(.85);}60%{transform:translateX(-50%) scale(1.1);}80%{transform:translateX(-50%) scale(1);opacity:1;}100%{opacity:0;transform:translateX(-50%) scale(.9);}}
+.float-emoji{font-size:34px;display:block;margin-bottom:6px;animation:emojiBounce .6s ease infinite;}
+@keyframes emojiBounce{0%,100%{transform:rotate(-8deg);}50%{transform:rotate(8deg);}}
+/* texto que se desliza en la pantalla de la consola (marquesina) */
+.screen-marquee{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:#ff5b52;text-shadow:0 0 8px rgba(255,91,82,.8);animation:marquee 2s linear;}
+@keyframes marquee{0%{transform:translate(100%,-50%);}100%{transform:translate(-120%,-50%);}}
+
+.pin-msg{font-size:13px;font-family:'JetBrains Mono',monospace;font-weight:700;margin-top:18px;min-height:18px;transition:color .2s;}
+.pin-msg.taunt{font-size:15px;animation:tauntPulse .5s ease;}
+@keyframes tauntPulse{0%{transform:scale(.7);opacity:0;}60%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+.lock-timer{font-size:12px;color:#c58ee8;font-family:'JetBrains Mono',monospace;margin-top:8px;}
 ::-webkit-scrollbar{width:8px;} ::-webkit-scrollbar-thumb{background:var(--surface2);border-radius:8px;}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-/* ---------- storage with fallback ---------- */
-let STORAGE_OK = true;
-const mem = {};
-(function(){ try{ const k='__t'+Date.now(); localStorage.setItem(k,'1'); STORAGE_OK = localStorage.getItem(k)==='1'; localStorage.removeItem(k);}catch(e){ STORAGE_OK=false; } })();
-function load(key,fb){ if(!STORAGE_OK) return key in mem?mem[key]:fb; try{const v=localStorage.getItem(key);return v!==null?JSON.parse(v):fb;}catch(e){return fb;} }
-function save(key,v){ mem[key]=v; if(!STORAGE_OK)return; try{localStorage.setItem(key,JSON.stringify(v));}catch(e){STORAGE_OK=false;} }
+let STORAGE_OK=true; const mem={};
+(function(){try{const k='__t'+Date.now();localStorage.setItem(k,'1');STORAGE_OK=localStorage.getItem(k)==='1';localStorage.removeItem(k);}catch(e){STORAGE_OK=false;}})();
+function load(key,fb){if(!STORAGE_OK)return key in mem?mem[key]:fb;try{const v=localStorage.getItem(key);return v!==null?JSON.parse(v):fb;}catch(e){return fb;}}
+function save(key,v){mem[key]=v;if(!STORAGE_OK)return;try{localStorage.setItem(key,JSON.stringify(v));}catch(e){STORAGE_OK=false;}}
+function saveRaw(key,str){mem[key]=str;if(!STORAGE_OK)return;try{localStorage.setItem(key,str);}catch(e){STORAGE_OK=false;}}
+function loadRaw(key){if(!STORAGE_OK)return key in mem?mem[key]:null;try{return localStorage.getItem(key);}catch(e){return null;}}
 
-/* ---------- state ---------- */
-const state = {
-  length: load('vault_len', 16),
-  opts: load('vault_opts', {lower:true, upper:true, num:true, sym:true}),
-  current: '',
-  history: load('vault_hist', []),
-  showHistory: load('vault_showhist', true),
-};
-
-const SETS = {
-  lower: 'abcdefghijklmnopqrstuvwxyz',
-  upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-  num: '0123456789',
-  sym: '!@#$%^&*()-_=+[]{};:,.<>?',
-};
-
-/* ---------- secure random ---------- */
-function secureRandInt(max){
-  // uniforme sin sesgo usando crypto
-  const arr = new Uint32Array(1);
-  const limit = Math.floor(0xFFFFFFFF / max) * max;
-  let x;
-  do { crypto.getRandomValues(arr); x = arr[0]; } while(x >= limit);
-  return x % max;
+const enc=new TextEncoder(); const dec=new TextDecoder();
+function b64(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf)));}
+function unb64(str){return Uint8Array.from(atob(str),c=>c.charCodeAt(0));}
+async function deriveKey(pin,saltBytes){
+  const baseKey=await crypto.subtle.importKey('raw',enc.encode(pin),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:saltBytes,iterations:250000,hash:'SHA-256'},baseKey,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
 }
-function generate(){
-  let pool = '';
-  const active = [];
-  if(state.opts.lower){ pool += SETS.lower; active.push(SETS.lower); }
-  if(state.opts.upper){ pool += SETS.upper; active.push(SETS.upper); }
-  if(state.opts.num){ pool += SETS.num; active.push(SETS.num); }
-  if(state.opts.sym){ pool += SETS.sym; active.push(SETS.sym); }
-  if(!pool){ return ''; }
+async function encryptData(obj,key){
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const data=enc.encode(JSON.stringify(obj));
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,data);
+  return {iv:b64(iv),ct:b64(ct)};
+}
+async function decryptData(payload,key){
+  const iv=unb64(payload.iv); const ct=unb64(payload.ct);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,ct);
+  return JSON.parse(dec.decode(pt));
+}
 
-  const len = state.length;
-  const chars = [];
-  // garantizar al menos un caracter de cada set activo (si cabe)
-  active.forEach(set=>{ if(chars.length < len) chars.push(set[secureRandInt(set.length)]); });
-  while(chars.length < len){ chars.push(pool[secureRandInt(pool.length)]); }
-  // barajar (Fisher-Yates con crypto)
-  for(let i=chars.length-1;i>0;i--){ const j=secureRandInt(i+1); [chars[i],chars[j]]=[chars[j],chars[i]]; }
+const SETS={lower:'abcdefghijklmnopqrstuvwxyz',upper:'ABCDEFGHIJKLMNOPQRSTUVWXYZ',num:'0123456789',sym:'!@#$%^&*()-_=+[]{};:,.<>?'};
+const state={
+  tab:'gen', length:load('vault_len',16), opts:load('vault_opts',{lower:true,upper:true,num:true,sym:true}),
+  current:'', segments:['','',''], unlocked:false, key:null, entries:[], revealed:{},
+  pinBuffer:'', pinStage:'', pinFirst:'', pinMsg:'', pinError:false, pinOk:false, pendingSave:null, forcePin:false,
+  wrongCount:0, locked:false, lockSecs:0, msgTaunt:false, wrathLevel:0,
+};
+const HAS_PIN=()=>loadRaw('vault_secure')!==null;
+
+function secureRandInt(max){const arr=new Uint32Array(1);const limit=Math.floor(0xFFFFFFFF/max)*max;let x;do{crypto.getRandomValues(arr);x=arr[0];}while(x>=limit);return x%max;}
+function generate(){
+  let pool='';const active=[];
+  if(state.opts.lower){pool+=SETS.lower;active.push(SETS.lower);}
+  if(state.opts.upper){pool+=SETS.upper;active.push(SETS.upper);}
+  if(state.opts.num){pool+=SETS.num;active.push(SETS.num);}
+  if(state.opts.sym){pool+=SETS.sym;active.push(SETS.sym);}
+  if(!pool)return'';
+  const len=state.length;const chars=[];
+  active.forEach(set=>{if(chars.length<len)chars.push(set[secureRandInt(set.length)]);});
+  while(chars.length<len)chars.push(pool[secureRandInt(pool.length)]);
+  for(let i=chars.length-1;i>0;i--){const j=secureRandInt(i+1);const t=chars[i];chars[i]=chars[j];chars[j]=t;}
   return chars.join('');
 }
+function poolSize(){let n=0;if(state.opts.lower)n+=26;if(state.opts.upper)n+=26;if(state.opts.num)n+=10;if(state.opts.sym)n+=24;return n;}
 
-/* ---------- strength (basado en entropía) ---------- */
-function poolSize(){
-  let n=0;
-  if(state.opts.lower)n+=26; if(state.opts.upper)n+=26;
-  if(state.opts.num)n+=10; if(state.opts.sym)n+=24;
-  return n;
+/* longitud de cada uno de los 3 segmentos (reparte la longitud total) */
+function segLengths(){
+  const total=state.length;
+  const base=Math.floor(total/3);
+  const rem=total-base*3;
+  return [base+(rem>0?1:0), base+(rem>1?1:0), base];
 }
-function entropyBits(){
-  const n = poolSize();
-  if(n<=1) return 0;
-  return Math.round(state.length * Math.log2(n));
+/* genera un segmento de longitud dada con las opciones activas */
+function generateSegment(len){
+  let pool='';
+  if(state.opts.lower)pool+=SETS.lower;
+  if(state.opts.upper)pool+=SETS.upper;
+  if(state.opts.num)pool+=SETS.num;
+  if(state.opts.sym)pool+=SETS.sym;
+  if(!pool||len<=0)return'';
+  let out='';
+  for(let i=0;i<len;i++) out+=pool[secureRandInt(pool.length)];
+  return out;
 }
-function strengthInfo(){
-  const bits = entropyBits();
-  if(bits < 40) return {label:'Débil', color:'var(--danger)', pct:25};
-  if(bits < 60) return {label:'Aceptable', color:'var(--warn)', pct:50};
-  if(bits < 80) return {label:'Fuerte', color:'var(--steel-bright)', pct:75};
-  return {label:'Muy fuerte', color:'var(--ok)', pct:100};
+function combineSegments(){ state.current=state.segments.join(''); }
+function entropyBits(){const n=poolSize();return n<=1?0:Math.round(state.length*Math.log2(n));}
+function strengthInfo(){const b=entropyBits();if(b<40)return{label:'Débil',color:'var(--danger)',pct:25};if(b<60)return{label:'Aceptable',color:'var(--warn)',pct:50};if(b<80)return{label:'Fuerte',color:'var(--steel-bright)',pct:75};return{label:'Muy fuerte',color:'var(--ok)',pct:100};}
+
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function colorize(pw){return pw.split('').map(c=>{if(/[0-9]/.test(c))return'<span class="num">'+escapeHtml(c)+'</span>';if(/[a-zA-Z]/.test(c))return escapeHtml(c);return'<span class="sym">'+escapeHtml(c)+'</span>';}).join('');}
+const uid=()=>Math.random().toString(36).slice(2,10);
+
+const ICO={
+  copy:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
+  check:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>',
+  refresh:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0114.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0020.5 15"/></svg>',
+  save:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>',
+  trash:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>',
+  eye:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+  eyeoff:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10 10 0 0112 20C5 20 1 12 1 12a18 18 0 015.06-5.94M9.9 4.24A9 9 0 0112 4c7 0 11 8 11 8a18 18 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><path d="M1 1l22 22"/></svg>',
+  lock:'<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--amber-bright)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+  lockSmall:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+  key:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+  bigLock:'<svg width="70" height="70" viewBox="0 0 24 24" fill="#a05cd0" stroke="#d9b3f0" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4" fill="none" stroke="#d9b3f0" stroke-width="2.5"/><circle cx="12" cy="16" r="1.6" fill="#2a1140"/></svg>',
+  demon:'<svg width="120" height="150" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">'
+    +'<defs><radialGradient id="skull" cx="42%" cy="30%" r="75%"><stop offset="0%" stop-color="#ffffff"/><stop offset="55%" stop-color="#dfe3e8"/><stop offset="100%" stop-color="#9aa2ac"/></radialGradient></defs>'
+    // craneo
+    +'<path d="M60 8 C30 8 16 30 16 54 C16 70 24 80 30 86 L30 98 C30 104 36 106 42 106 L42 112 C42 116 46 118 50 118 L70 118 C74 118 78 116 78 112 L78 106 C84 106 90 104 90 98 L90 86 C96 80 104 70 104 54 C104 30 90 8 60 8 Z" fill="url(#skull)" stroke="#6a7078" stroke-width="2"/>'
+    // cuencas de ojos
+    +'<ellipse cx="42" cy="54" rx="14" ry="16" fill="#141414"/>'
+    +'<ellipse cx="78" cy="54" rx="14" ry="16" fill="#141414"/>'
+    // brillos rojos en los ojos
+    +'<circle cx="42" cy="56" r="5" fill="#ff2d2d"><animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite"/></circle>'
+    +'<circle cx="78" cy="56" r="5" fill="#ff2d2d"><animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite"/></circle>'
+    // nariz
+    +'<path d="M60 66 L54 82 L60 86 L66 82 Z" fill="#141414"/>'
+    // dientes superiores (fijos, en el craneo)
+    +'<g fill="#e8ebef" stroke="#9aa2ac" stroke-width="1">'
+    +'<rect x="44" y="98" width="7" height="12" rx="2"/><rect x="52" y="98" width="7" height="14" rx="2"/><rect x="60" y="98" width="7" height="14" rx="2"/><rect x="68" y="98" width="7" height="12" rx="2"/>'
+    +'</g>'
+    // MANDIBULA (se anima abriendose)
+    +'<g class="jaw">'
+    +'<path d="M40 116 C40 130 48 140 60 140 C72 140 80 130 80 116 C80 122 74 124 68 124 L52 124 C46 124 40 122 40 116 Z" fill="url(#skull)" stroke="#6a7078" stroke-width="2"/>'
+    +'<g fill="#e8ebef" stroke="#9aa2ac" stroke-width="1">'
+    +'<rect x="46" y="122" width="6" height="9" rx="2"/><rect x="53" y="123" width="6" height="10" rx="2"/><rect x="61" y="123" width="6" height="10" rx="2"/><rect x="68" y="122" width="6" height="9" rx="2"/>'
+    +'</g></g>'
+    +'</svg>',
+};
+
+function copyText(text,btnEl){
+  const done=function(){if(btnEl){btnEl.classList.add('copied');const o=btnEl.innerHTML;btnEl.innerHTML=ICO.check;setTimeout(function(){btnEl.classList.remove('copied');btnEl.innerHTML=o;},1200);}};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done).catch(function(){fallbackCopy(text,done);});}
+  else fallbackCopy(text,done);
+}
+function fallbackCopy(text,cb){const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');cb&&cb();}catch(e){}document.body.removeChild(ta);}
+
+/* anima un solo segmento como rodillo de tragamonedas */
+function spinOneSegment(idx, finalSeg, onDone){
+  const reels=document.getElementById('reels'+idx);
+  if(!reels){ state.segments[idx]=finalSeg; combineSegments(); render(); if(onDone)onDone(); return; }
+  const pool='ABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%&*';
+  const n=finalSeg.length;
+  if(n===0){ state.segments[idx]=''; combineSegments(); if(onDone)onDone(); return; }
+  reels.innerHTML=Array.from({length:n}).map(function(){return '<span class="reel-char spinning">'+pool[Math.floor(Math.random()*pool.length)]+'</span>';}).join('');
+  const cells=reels.querySelectorAll('.reel-char');
+  const spin=setInterval(function(){
+    cells.forEach(function(c){ if(c.classList.contains('spinning')) c.textContent=pool[Math.floor(Math.random()*pool.length)]; });
+  },60);
+  finalSeg.split('').forEach(function(ch,i){
+    setTimeout(function(){
+      const c=cells[i]; if(!c)return;
+      c.classList.remove('spinning');
+      c.textContent=ch;
+      c.className='reel-char '+(/[0-9]/.test(ch)?'num':(/[a-zA-Z]/.test(ch)?'':'sym'));
+    }, 350 + i*70);
+  });
+  setTimeout(function(){
+    clearInterval(spin);
+    state.segments[idx]=finalSeg;
+    combineSegments();
+    if(onDone) onDone(); else render();
+  }, 350 + n*70 + 200);
 }
 
-/* ---------- render helpers ---------- */
-function colorize(pw){
-  return pw.split('').map(c=>{
-    if(/[0-9]/.test(c)) return `<span class="num">${escapeHtml(c)}</span>`;
-    if(/[a-zA-Z]/.test(c)) return escapeHtml(c);
-    return `<span class="sym">${escapeHtml(c)}</span>`;
-  }).join('');
+/* gira los tres segmentos a la vez */
+function spinAll(){
+  const lens=segLengths();
+  const newSegs=[generateSegment(lens[0]), generateSegment(lens[1]), generateSegment(lens[2])];
+  if(!newSegs.join('')) return;
+  let done=0;
+  for(let i=0;i<3;i++){
+    (function(idx){
+      spinOneSegment(idx, newSegs[idx], function(){
+        done++;
+        if(done===3) render();
+      });
+    })(i);
+  }
 }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
-const ICO_COPY = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
-const ICO_CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>';
-const ICO_REFRESH = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0114.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0020.5 15"/></svg>';
-const ICO_TRASH = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m2 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/></svg>';
-const ICO_LOCK = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber-bright)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>';
+async function persistVault(){
+  if(!state.key)return;
+  const secure=loadRaw('vault_secure'); if(!secure)return;
+  const meta=JSON.parse(secure);
+  meta.data=await encryptData(state.entries,state.key);
+  saveRaw('vault_secure',JSON.stringify(meta));
+}
+async function createVault(pin){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const key=await deriveKey(pin,salt);
+  const verifier=await encryptData({v:'ok'},key);
+  const data=await encryptData([],key);
+  saveRaw('vault_secure',JSON.stringify({salt:b64(salt),verifier,data}));
+  state.key=key;state.entries=[];state.unlocked=true;
+}
+async function unlockVault(pin){
+  const secure=loadRaw('vault_secure'); if(!secure)return false;
+  const meta=JSON.parse(secure);
+  const key=await deriveKey(pin,unb64(meta.salt));
+  try{
+    await decryptData(meta.verifier,key);
+    state.key=key;
+    state.entries=meta.data?await decryptData(meta.data,key):[];
+    state.unlocked=true;
+    return true;
+  }catch(e){return false;}
+}
+async function rekeyVault(newPin){
+  const salt=crypto.getRandomValues(new Uint8Array(16));
+  const key=await deriveKey(newPin,salt);
+  const verifier=await encryptData({v:'ok'},key);
+  const data=await encryptData(state.entries,key);
+  saveRaw('vault_secure',JSON.stringify({salt:b64(salt),verifier,data}));
+  state.key=key;
+}
 
 function render(){
-  const s = strengthInfo();
-  const optRows = [
-    {key:'lower', label:'Minúsculas', ex:'a-z'},
-    {key:'upper', label:'Mayúsculas', ex:'A-Z'},
-    {key:'num', label:'Números', ex:'0-9'},
-    {key:'sym', label:'Símbolos', ex:'!@#$'},
-  ];
-  document.getElementById('app').innerHTML = `
-    ${!STORAGE_OK ? `<div class="warn-banner">⚠ El historial no se guardará permanentemente en este contexto (se pierde al recargar). Funciona bien al abrir la página desde su URL de GitHub Pages.</div>` : ''}
-    <div class="brand">
-      <div class="brand-mark">${ICO_LOCK}</div>
-      <div>
-        <h1 class="disp">Bóveda</h1>
-        <p>GENERADOR DE CONTRASEÑAS SEGURAS</p>
-      </div>
-    </div>
+  if(state.forcePin || (state.tab==='vault' && !state.unlocked)){ renderPinScreen(); return; }
+  const s=strengthInfo();
+  const optRows=[{key:'lower',label:'Minúsculas',ex:'a-z'},{key:'upper',label:'Mayúsculas',ex:'A-Z'},{key:'num',label:'Números',ex:'0-9'},{key:'sym',label:'Símbolos',ex:'!@#$'}];
+  const segLens=segLengths();
+  function segLine(idx){
+    const seg=state.segments[idx]||'';
+    const chars = seg
+      ? seg.split('').map(function(c){
+          var cls=/[0-9]/.test(c)?'num':(/[a-zA-Z]/.test(c)?'':'sym');
+          return '<span class="reel-char '+cls+'">'+escapeHtml(c)+'</span>';
+        }).join('')
+      : '<span class="placeholder">parte '+(idx+1)+'</span>';
+    return '<div class="reel-line">'
+      +'<div class="reels reels-seg" id="reels'+idx+'">'+chars+'</div>'
+      +'<button class="seg-spin" data-action="spinseg" data-seg="'+idx+'" title="Girar parte '+(idx+1)+'">🎰</button>'
+      +'</div>';
+  }
+  const chips = Array.from({length:4}).map(function(_,i){
+    var lvl = s.pct>=(i+1)*25;
+    return '<span class="chip'+(lvl&&state.current?' on':'')+'" style="background:'+(lvl&&state.current?s.color:'#333')+';border-color:'+(state.current?s.color:'rgba(255,255,255,.4)')+';"></span>';
+  }).join('');
 
-    <div class="card">
-      <div class="output">
-        <div class="output-text" id="outText">${state.current ? colorize(state.current) : '<span class="muted">Pulsa generar…</span>'}</div>
-        <button class="icon-btn" id="copyBtn" title="Copiar" ${state.current?'':'disabled'}>${ICO_COPY}</button>
-        <button class="icon-btn" data-action="regen" title="Regenerar">${ICO_REFRESH}</button>
-      </div>
-      <div class="meter"><div class="meter-fill" style="width:${state.current?s.pct:0}%;background:${s.color};"></div></div>
-      <div class="row between" style="margin-top:6px;">
-        <span class="mono" style="font-size:11px;color:${s.color};">${state.current?s.label:'—'}</span>
-        <span class="mono" style="font-size:11px;color:var(--muted);">${entropyBits()} bits de entropía</span>
-      </div>
-    </div>
+  const genView=''
+    +'<div class="casino-card">'
+    +'<div class="bulbs">'+Array.from({length:12}).map(function(){return '<span class="bulb"></span>';}).join('')+'</div>'
+    +'<div class="casino-title">★ Contraseña de la suerte ★</div>'
+    +segLine(0)+segLine(1)+segLine(2)
+    +'<div class="chip-meter">'+chips+'</div>'
+    +'<div class="casino-stats"><span style="color:'+s.color+';">'+(state.current?s.label:'—')+'</span><span style="color:#c99a3a;">'+entropyBits()+' bits</span></div>'
+    +'<div class="casino-actions">'
+    +'<button class="icon-btn" id="copyBtn" title="Copiar" style="flex:1;" '+(state.current?'':'disabled')+'>'+ICO.copy+' <span style="font-family:Oswald;font-size:12px;letter-spacing:1px;margin-left:6px;">COPIAR</span></button>'
+    +'<button class="btn-save" data-action="saveToVault" style="flex:1;margin-top:0;" '+(state.current?'':'disabled')+'>'+ICO.lockSmall+' GUARDAR</button>'
+    +'</div>'
+    +'</div>'
+    +'<button class="btn-spin" data-action="spin">🎰 GIRAR TODO</button>'
+    +'<div class="cfg-card" style="margin-top:16px;"><p class="cfg-title">🎲 Longitud</p><div class="row between"><span class="mono muted" style="font-size:12px;">Caracteres</span><span class="len-val">'+state.length+'</span></div>'
+    +'<input type="range" id="lenRange" min="4" max="48" value="'+state.length+'"><div class="row between mono" style="font-size:10px;color:var(--muted);"><span>4</span><span>48</span></div></div>'
+    +'<div class="cfg-card"><p class="cfg-title">🃏 Incluir</p>'+optRows.map(function(o){return '<div class="toggle-row"><span class="toggle-label">'+o.label+'<span class="ex">'+o.ex+'</span></span><label class="switch"><input type="checkbox" data-opt="'+o.key+'" '+(state.opts[o.key]?'checked':'')+'><span class="slider-sw"></span></label></div>';}).join('')+'</div>'
+    +'<p class="mono" style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;line-height:1.6;">Generadas con crypto.getRandomValues.<br>Todo ocurre en tu dispositivo.</p>'
+    +'<button class="btn-vault-enter" data-action="tab" data-tab="vault">'+ICO.lockSmall+' ENTRAR A LA BÓVEDA</button>';
 
-    <div class="card">
-      <p class="section-title">LONGITUD</p>
-      <div class="row between slider-row">
-        <span class="mono muted" style="font-size:12px;">Caracteres</span>
-        <span class="len-val">${state.length}</span>
-      </div>
-      <input type="range" id="lenRange" min="4" max="48" value="${state.length}">
-      <div class="row between mono" style="font-size:10px;color:var(--muted);">
-        <span>4</span><span>48</span>
-      </div>
-    </div>
+  const vaultView=''
+    +'<div class="card"><div class="row between" style="margin-bottom:14px;"><button class="link-btn" data-action="tab" data-tab="gen">‹ volver</button><button class="link-btn" data-action="lockVault">🔒 bloquear</button></div>'
+    +'<p class="section-title" style="margin:0 0 14px;">CONTRASEÑAS GUARDADAS</p>'
+    +(state.entries.length===0
+      ? '<p class="empty">Aún no has guardado contraseñas.<br>Genera una y pulsa "Guardar en la bóveda".</p>'
+      : state.entries.map(function(e){
+          const shown=state.revealed[e.id];
+          return '<div class="vault-item"><div class="label">'+escapeHtml(e.label||'Sin nombre')+'</div>'
+            +'<div class="row gap8"><span class="vault-pw '+(shown?'':'hidden')+'">'+(shown?escapeHtml(e.pw):'•'.repeat(Math.min(e.pw.length,20)))+'</span>'
+            +'<button class="icon-btn" data-action="reveal" data-id="'+e.id+'" style="padding:6px;">'+(shown?ICO.eyeoff:ICO.eye)+'</button>'
+            +'<button class="icon-btn" data-action="copyEntry" data-id="'+e.id+'" style="padding:6px;">'+ICO.copy+'</button>'
+            +'<button class="icon-btn" data-action="delEntry" data-id="'+e.id+'" style="padding:6px;color:var(--danger);">'+ICO.trash+'</button></div></div>';
+        }).join(''))
+    +'</div>'
+    +'<div class="card"><p class="section-title">CAMBIAR PIN</p><p class="mono" style="font-size:11px;color:var(--muted);line-height:1.6;margin:0 0 12px;">Para cambiar tu PIN necesitas conocer el actual. Si lo olvidas, no hay forma de recuperar las contraseñas — esto es justo lo que las mantiene seguras.</p><button class="link-btn" data-action="startChangePin" style="color:var(--amber-bright);">Cambiar PIN</button></div>'
+    +'<p class="mono" style="font-size:10px;color:var(--muted);text-align:center;margin-top:4px;line-height:1.6;">Cifradas con AES-256-GCM. La llave se deriva de tu PIN<br>y nunca se guarda: sin el PIN, los datos son ilegibles.</p>';
 
-    <div class="card">
-      <p class="section-title">INCLUIR</p>
-      ${optRows.map(o=>`
-        <div class="toggle-row">
-          <span class="toggle-label">${o.label}<span class="ex">${o.ex}</span></span>
-          <label class="switch">
-            <input type="checkbox" data-opt="${o.key}" ${state.opts[o.key]?'checked':''}>
-            <span class="slider-sw"></span>
-          </label>
-        </div>`).join('')}
-    </div>
-
-    <button class="btn-generate disp" data-action="generate">Generar contraseña</button>
-
-    <div class="card" style="margin-top:16px;">
-      <div class="row between" style="margin-bottom:${state.showHistory?'14px':'0'};">
-        <p class="section-title" style="margin:0;">HISTORIAL RECIENTE</p>
-        <div class="row gap12">
-          <button class="link-btn" data-action="toggleHist">${state.showHistory?'ocultar':'mostrar'}</button>
-          ${state.history.length?`<button class="link-btn" data-action="clearHist" style="color:var(--danger);">limpiar</button>`:''}
-        </div>
-      </div>
-      ${state.showHistory ? (state.history.length===0
-        ? `<p class="empty">Las contraseñas que generes aparecerán aquí.</p>`
-        : state.history.map((pw,i)=>`
-          <div class="hist-item">
-            <span class="hist-pw">${escapeHtml(pw)}</span>
-            <button class="icon-btn" data-action="copyHist" data-idx="${i}" style="padding:6px;">${ICO_COPY}</button>
-            <button class="icon-btn" data-action="delHist" data-idx="${i}" style="padding:6px;color:var(--danger);border-color:var(--border);">${ICO_TRASH}</button>
-          </div>`).join('')
-      ) : ''}
-    </div>
-
-    <p class="mono" style="font-size:10px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.6;">
-      Generadas con crypto.getRandomValues (aleatoriedad criptográfica).<br>Todo ocurre en tu dispositivo — nada se envía a ningún servidor.
-    </p>
-  `;
+  document.getElementById('app').innerHTML=''
+    +(!STORAGE_OK?'<div class="warn-banner">⚠ El almacenamiento permanente no está disponible en este contexto (los datos se pierden al recargar). Funciona bien al abrir la página desde su URL de GitHub Pages.</div>':'')
+    +'<div class="brand"><div class="brand-mark">'+ICO.lock+'</div><div><h1 class="disp">Genera</h1><p>CONTRASEÑAS SEGURAS</p></div></div>'
+    +(state.tab==='gen'?genView:vaultView);
   attachControls();
+  if(state.unlocked && state.pendingSave){ const pw=state.pendingSave; state.pendingSave=null; promptLabelAndSave(pw); }
+}
+
+function renderPinScreen(){
+  if(!state.pinStage){ state.pinStage=HAS_PIN()?'enter':'set1'; }
+  let title,sub;
+  if(state.pinStage==='set1'){title='Crea tu PIN';sub='Elige un PIN de 6 dígitos. Cifrará todas tus contraseñas. Anótalo en un lugar seguro: si lo olvidas, no se puede recuperar.';}
+  else if(state.pinStage==='set2'){title='Confirma tu PIN';sub='Vuelve a escribir los 6 dígitos para confirmar.';}
+  else if(state.pinStage==='enter'){title='Ingresa tu PIN';sub='Escribe tu PIN de 6 dígitos para abrir la bóveda.';}
+  else if(state.pinStage==='change_cur'){title='PIN actual';sub='Escribe tu PIN actual para poder cambiarlo.';}
+  else if(state.pinStage==='change_new1'){title='Nuevo PIN';sub='Escribe el nuevo PIN de 6 dígitos.';}
+  else if(state.pinStage==='change_new2'){title='Confirma el nuevo PIN';sub='Repite el nuevo PIN.';}
+
+  let screenClass = state.pinOk ? 'ok' : (state.pinError ? (state.wrathLevel===1 ? 'warn1' : 'error') : '');
+  if(state.locked) screenClass='locked';
+  let statusText;
+  if(state.locked) statusText='SISTEMA BLOQUEADO';
+  else if(state.pinOk) statusText='ACCESO CONCEDIDO';
+  else if(state.pinError) statusText='ACCESO DENEGADO';
+  else if(state.pinStage==='set1'||state.pinStage==='change_new1') statusText='NUEVO CÓDIGO';
+  else if(state.pinStage==='set2'||state.pinStage==='change_new2') statusText='CONFIRMAR';
+  else statusText='INGRESE CÓDIGO';
+  const cells=Array.from({length:6}).map(function(_,i){
+    const on=i<state.pinBuffer.length;
+    return '<span class="cell'+(on?' on':'')+'">'+(on?'*':'-')+'</span>';
+  }).join('');
+  const screen='<div class="pin-screen '+screenClass+'">'
+    +'<div class="screen-status"><span class="rec">'+(state.locked?'LOCK':'SEC')+'</span><span>'+statusText+'</span></div>'
+    +'<div class="screen-digits">'+cells+'</div></div>';
+
+  const keys=['1','2','3','4','5','6','7','8','9'];
+  const keypad=keys.map(function(k){return '<button class="key" data-key="'+k+'">'+k+'</button>';}).join('')
+    +'<button class="key action" data-action="pinExit">salir</button>'
+    +'<button class="key" data-key="0">0</button>'
+    +'<button class="key action" data-key="del">⌫</button>';
+
+  const meshLayer = '<div class="mesh"></div><div class="mesh-lock">'+ICO.bigLock+'</div>';
+  const wrapClass = 'pin-wrap'+(state.pinOk?' success':'')+((state.pinError&&state.wrathLevel>=1)?' wrath':'');
+  const msgColor = state.locked ? '#c58ee8' : (state.pinError ? (state.wrathLevel===1 ? '#ff9d33' : 'var(--danger)') : 'var(--muted)');
+
+  document.getElementById('app').innerHTML=''
+    +(!STORAGE_OK?'<div class="warn-banner">⚠ El almacenamiento permanente no está disponible en este contexto. Usa la app desde su URL de GitHub Pages para que el PIN y las contraseñas se guarden.</div>':'')
+    +'<div class="'+wrapClass+'"><div class="pin-lock'+(state.pinOk?' unlocked':'')+'">'+ICO.lock+'</div><h2 class="pin-title">'+title+'</h2><p class="pin-sub">'+sub+'</p>'
+    +'<div class="keypad-wrap'+(state.locked?' locked':'')+'"><div class="console-unit">'
+    +'<span class="screw tl"></span><span class="screw tr"></span><span class="screw bl"></span><span class="screw br"></span>'
+    +screen
+    +'<div class="keypad-plate"><div class="keypad">'+keypad+'</div></div>'
+    +'</div>'+meshLayer+'</div>'
+    +'<div class="pin-msg'+(state.msgTaunt?' taunt':'')+'" style="color:'+msgColor+';">'+(state.pinMsg||'')+'</div>'
+    +(state.locked?'<div class="lock-timer">Bloqueado — reintenta en '+state.lockSecs+'s</div>':'')
+    +'</div>';
 }
 
 function attachControls(){
-  const lenRange = document.getElementById('lenRange');
+  const lenRange=document.getElementById('lenRange');
   if(lenRange){
-    lenRange.addEventListener('input', (e)=>{
-      state.length = Number(e.target.value);
-      save('vault_len', state.length);
-      // actualizar solo el numero y meter sin re-render completo (mantiene drag suave)
-      document.querySelector('.len-val').textContent = state.length;
-    });
-    lenRange.addEventListener('change', ()=> render());
+    lenRange.addEventListener('input',function(e){state.length=Number(e.target.value);save('vault_len',state.length);const el=document.querySelector('.len-val');if(el)el.textContent=state.length;});
+    lenRange.addEventListener('change',function(){render();});
   }
-  document.querySelectorAll('[data-opt]').forEach(chk=>{
-    chk.addEventListener('change', (e)=>{
-      const key = e.target.dataset.opt;
-      const checked = e.target.checked;
-      // no permitir desactivar el último set activo
-      const activeCount = Object.values(state.opts).filter(Boolean).length;
-      if(!checked && activeCount<=1){ e.target.checked = true; return; }
-      state.opts[key] = checked;
-      save('vault_opts', state.opts);
-      render();
+  Array.prototype.forEach.call(document.querySelectorAll('[data-opt]'),function(chk){
+    chk.addEventListener('change',function(e){
+      const key=e.target.dataset.opt,checked=e.target.checked;
+      const activeCount=Object.values(state.opts).filter(Boolean).length;
+      if(!checked&&activeCount<=1){e.target.checked=true;return;}
+      state.opts[key]=checked;save('vault_opts',state.opts);render();
     });
   });
-  const copyBtn = document.getElementById('copyBtn');
-  if(copyBtn && state.current){
-    copyBtn.addEventListener('click', ()=> copyText(state.current, copyBtn));
+  const copyBtn=document.getElementById('copyBtn');
+  if(copyBtn&&state.current)copyBtn.addEventListener('click',function(){copyText(state.current,copyBtn);});
+}
+
+function updateDotsOnly(){
+  const screenEl=document.querySelector('.pin-screen');
+  if(!screenEl){ renderPinScreen(); return; }
+  let cls='pin-screen'+(state.pinOk?' ok':'')+(state.pinError?' error':'');
+  if(state.locked) cls='pin-screen locked';
+  screenEl.className=cls;
+  const cells=screenEl.querySelectorAll('.screen-digits .cell');
+  cells.forEach(function(c,i){
+    const on=i<state.pinBuffer.length;
+    const wasOn=c.classList.contains('on');
+    if(on&&!wasOn){ c.classList.add('on'); c.textContent='*'; }
+    else if(!on&&wasOn){ c.classList.remove('on'); c.textContent='-'; }
+  });
+  const msg=document.querySelector('.pin-msg');
+  if(msg){ msg.textContent=state.pinMsg||''; msg.style.color=state.pinError?(state.wrathLevel===1?'#ff9d33':'var(--danger)'):'var(--muted)'; }
+}
+function pinDigit(d){
+  if(state.locked)return;
+  if(state.pinBuffer.length>=6)return;
+  state.pinError=false;state.pinMsg='';state.msgTaunt=false;
+  state.pinBuffer+=d;
+  updateDotsOnly();
+  if(state.pinBuffer.length===6)setTimeout(processPin,180);
+}
+function pinDel(){if(state.locked)return;state.pinError=false;state.pinBuffer=state.pinBuffer.slice(0,-1);updateDotsOnly();}
+
+/* fallo simple (para confirmaciones que no coinciden, PIN de cambio, etc.) */
+function pinFail(msg){
+  state.pinError=true;state.pinMsg=msg;state.msgTaunt=false;state.pinBuffer='';state.wrathLevel=1;
+  renderPinScreen();
+  setTimeout(function(){state.pinError=false;state.wrathLevel=0;renderPinScreen();},600);
+}
+
+/* fallo al DESBLOQUEAR: escala con burlas y bloqueo al tercero */
+function pinWrongUnlock(){
+  state.wrongCount++;
+  state.pinBuffer='';
+  state.pinError=true;
+  state.msgTaunt=true;
+  if(state.wrongCount===1){
+    // 1er intento: "PIN incorrecto" + frase flotante "¿acaso intentas algo?"
+    state.wrathLevel=1;
+    state.pinMsg='PIN incorrecto';
+    renderPinScreen();
+    showFloatPhrase('¿acaso intentas algo?', 'orange');
+    setTimeout(function(){state.pinError=false;state.wrathLevel=0;renderPinScreen();},1600);
+  }else if(state.wrongCount===2){
+    // 2do intento: carita de risa + "PIN no descifrado" + marquesina en pantalla
+    state.wrathLevel=2;
+    state.pinMsg='😆 PIN no descifrado';
+    renderPinScreen();
+    showScreenMarquee('jaja que, ¿no puedes?');
+    setTimeout(function(){state.pinError=false;state.wrathLevel=0;renderPinScreen();},2200);
+  }else{
+    // 3er intento: "fracasaste" y luego la calavera + candado + malla
+    state.wrathLevel=3;
+    showFloatPhrase('FRACASASTE', 'purple');
+    setTimeout(function(){ showDemonThenLock(); }, 1500);
   }
 }
 
-function copyText(text, btnEl){
-  const done = ()=>{
-    if(btnEl){ btnEl.classList.add('copied'); btnEl.innerHTML = ICO_CHECK;
-      setTimeout(()=>{ btnEl.classList.remove('copied'); btnEl.innerHTML = ICO_COPY; }, 1200); }
-  };
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(text).then(done).catch(()=>fallbackCopy(text,done));
-  } else { fallbackCopy(text, done); }
-}
-function fallbackCopy(text, cb){
-  const ta = document.createElement('textarea');
-  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
-  document.body.appendChild(ta); ta.select();
-  try{ document.execCommand('copy'); cb&&cb(); }catch(e){}
-  document.body.removeChild(ta);
+/* frase que cae/flota al centro de la pantalla */
+function showFloatPhrase(text, color){
+  const el=document.createElement('div');
+  el.className='float-phrase '+color;
+  el.textContent=text;
+  document.body.appendChild(el);
+  const dur = color==='purple' ? 1600 : 2000;
+  setTimeout(function(){ el.remove(); }, dur);
 }
 
-document.addEventListener('click', (e)=>{
-  const btn = e.target.closest('[data-action]');
-  if(!btn) return;
-  const a = btn.dataset.action;
-  if(a==='generate' || a==='regen'){
-    const pw = generate();
-    if(!pw) return;
-    state.current = pw;
-    state.history.unshift(pw);
-    if(state.history.length>10) state.history = state.history.slice(0,10);
-    save('vault_hist', state.history);
+/* texto que se desliza de derecha a izquierda dentro de la pantalla de la consola */
+function showScreenMarquee(text){
+  const screen=document.querySelector('.pin-screen');
+  if(!screen) return;
+  const digits=screen.querySelector('.screen-digits');
+  if(digits) digits.style.visibility='hidden';
+  const mq=document.createElement('div');
+  mq.className='screen-marquee';
+  mq.textContent=text;
+  screen.appendChild(mq);
+  setTimeout(function(){
+    mq.remove();
+    if(digits) digits.style.visibility='visible';
+  }, 2000);
+}
+
+function showDemonThenLock(){
+  // overlay con la carita riéndose
+  const ov=document.createElement('div');
+  ov.className='demon-overlay';
+  ov.innerHTML='<div class="demon-face">'+ICO.demon+'</div><div class="demon-text">JAJAJA... ¿esa creías que era?</div>';
+  document.body.appendChild(ov);
+  setTimeout(function(){
+    ov.style.transition='opacity .4s ease';
+    ov.style.opacity='0';
+    setTimeout(function(){ ov.remove(); }, 400);
+    // ahora sí, el bloqueo con candado y malla
+    state.locked=true;
+    state.lockSecs=15;
+    state.pinMsg='🔒 SISTEMA BLOQUEADO';
+    state.msgTaunt=true;
+    renderPinScreen();
+    startLockCountdown();
+  }, 2000);
+}
+
+function startLockCountdown(){
+  if(state._lockTimer) clearInterval(state._lockTimer);
+  state._lockTimer=setInterval(function(){
+    state.lockSecs--;
+    if(state.lockSecs<=0){
+      clearInterval(state._lockTimer); state._lockTimer=null;
+      state.locked=false; state.wrongCount=0; state.wrathLevel=0;
+      state.pinError=false; state.msgTaunt=false;
+      state.pinMsg='Ok, otra oportunidad. No la desperdicies.';
+      renderPinScreen();
+      setTimeout(function(){ if(!state.locked){ state.pinMsg=''; renderPinScreen(); } },2500);
+    }else{
+      const t=document.querySelector('.lock-timer');
+      if(t) t.textContent='Bloqueado — reintenta en '+state.lockSecs+'s';
+      else renderPinScreen();
+    }
+  },1000);
+}
+
+async function pinSuccessThen(fn){
+  state.pinOk=true; state.pinError=false;
+  const screenEl=document.querySelector('.pin-screen'); if(screenEl){ screenEl.className='pin-screen ok'; const st=screenEl.querySelector('.screen-status span:last-child'); if(st) st.textContent='ACCESO CONCEDIDO'; }
+  const lock=document.querySelector('.pin-lock'); if(lock) lock.classList.add('unlocked');
+  await new Promise(function(r){ setTimeout(r,450); });
+  // render de la boveda por debajo, luego la puerta se abre revelandola
+  state.pinOk=false;
+  fn();
+  playVaultDoor();
+  await new Promise(function(r){ setTimeout(r,1150); });
+}
+
+function playVaultDoor(){
+  const wheel='<svg width="84" height="84" viewBox="0 0 84 84"><circle cx="42" cy="42" r="34" fill="#252d38" stroke="#0a0d12" stroke-width="3"/><circle cx="42" cy="42" r="10" fill="#3a434f" stroke="#0a0d12" stroke-width="2"/>'
+    +'<g stroke="#5a6472" stroke-width="6" stroke-linecap="round"><line x1="42" y1="12" x2="42" y2="26"/><line x1="42" y1="58" x2="42" y2="72"/><line x1="12" y1="42" x2="26" y2="42"/><line x1="58" y1="42" x2="72" y2="42"/>'
+    +'<line x1="21" y1="21" x2="31" y2="31"/><line x1="53" y1="53" x2="63" y2="63"/><line x1="63" y1="21" x2="53" y2="31"/><line x1="31" y1="53" x2="21" y2="63"/></g></svg>';
+  const flash=document.createElement('div'); flash.className='vault-flash';
+  const door=document.createElement('div'); door.className='vault-door';
+  door.innerHTML=''
+    +'<div class="leaf left"><div class="vault-rivets"></div><div class="vault-wheel">'+wheel+'</div></div>'
+    +'<div class="leaf right"><div class="vault-rivets"></div></div>';
+  document.body.appendChild(flash);
+  document.body.appendChild(door);
+  setTimeout(function(){ door.remove(); flash.remove(); }, 1200);
+}
+async function processPin(){
+  const pin=state.pinBuffer,stage=state.pinStage;
+  if(stage==='set1'){state.pinFirst=pin;state.pinBuffer='';state.pinStage='set2';renderPinScreen();return;}
+  if(stage==='set2'){
+    if(pin!==state.pinFirst){pinFail('No coinciden. Empieza de nuevo.');state.pinStage='set1';state.pinFirst='';return;}
+    await createVault(pin);
+    await pinSuccessThen(function(){state.pinBuffer='';state.pinStage='';state.pinFirst='';state.forcePin=false;state.tab='vault';render();});
+    return;
+  }
+  if(stage==='enter'){
+    const ok=await unlockVault(pin);
+    if(ok){ state.wrongCount=0; state.wrathLevel=0; await pinSuccessThen(function(){state.pinBuffer='';state.pinStage='';state.forcePin=false;state.tab='vault';render();}); }
+    else pinWrongUnlock();
+    return;
+  }
+  if(stage==='change_cur'){
+    const ok=await unlockVault(pin);
+    if(ok){state.pinBuffer='';state.pinStage='change_new1';state.pinMsg='';renderPinScreen();}
+    else pinFail('PIN actual incorrecto.');
+    return;
+  }
+  if(stage==='change_new1'){state.pinFirst=pin;state.pinBuffer='';state.pinStage='change_new2';renderPinScreen();return;}
+  if(stage==='change_new2'){
+    if(pin!==state.pinFirst){pinFail('No coinciden. Escribe el nuevo PIN otra vez.');state.pinStage='change_new1';state.pinFirst='';return;}
+    await rekeyVault(pin);
+    await pinSuccessThen(function(){state.pinBuffer='';state.pinStage='';state.pinFirst='';state.pinMsg='';state.forcePin=false;state.tab='vault';render();});
+    return;
+  }
+}
+
+document.addEventListener('click',async function(e){
+  const keyBtn=e.target.closest('[data-key]');
+  if(keyBtn){
+    // efecto ripple + pressed
+    keyBtn.classList.add('pressed');
+    setTimeout(function(){ keyBtn.classList.remove('pressed'); }, 280);
+    const rip=document.createElement('span');
+    rip.className='ripple';
+    const rect=keyBtn.getBoundingClientRect();
+    const size=Math.max(rect.width,rect.height);
+    rip.style.width=rip.style.height=size+'px';
+    rip.style.left=(e.clientX-rect.left-size/2)+'px';
+    rip.style.top=(e.clientY-rect.top-size/2)+'px';
+    keyBtn.appendChild(rip);
+    setTimeout(function(){ rip.remove(); }, 500);
+    const k=keyBtn.dataset.key;
+    if(k==='del')pinDel();else pinDigit(k);
+    return;
+  }
+  const btn=e.target.closest('[data-action]');
+  if(!btn)return;
+  const a=btn.dataset.action;
+  if(a==='tab'){
+    const t=btn.dataset.tab;state.tab=t;
+    if(t==='vault'&&!state.unlocked){state.pinStage=HAS_PIN()?'enter':'set1';state.pinBuffer='';state.pinMsg='';state.pinError=false;state.forcePin=false;}
     render();
   }
-  else if(a==='toggleHist'){ state.showHistory=!state.showHistory; save('vault_showhist',state.showHistory); render(); }
-  else if(a==='clearHist'){ state.history=[]; save('vault_hist',[]); render(); }
-  else if(a==='copyHist'){ copyText(state.history[Number(btn.dataset.idx)], btn); }
-  else if(a==='delHist'){ state.history.splice(Number(btn.dataset.idx),1); save('vault_hist',state.history); render(); }
+  else if(a==='pinExit'){ state.forcePin=false; state.pinStage=''; state.pinBuffer=''; if(!state.unlocked)state.tab='gen'; render(); }
+  else if(a==='generate'||a==='regen'){ spinAll(); }
+  else if(a==='spin'){ spinAll(); }
+  else if(a==='spinseg'){
+    const idx=Number(btn.dataset.seg);
+    const lens=segLengths();
+    const newSeg=generateSegment(lens[idx]);
+    if(!newSeg)return;
+    spinOneSegment(idx, newSeg);
+  }
+  else if(a==='saveToVault'){
+    if(!state.current)return;
+    if(!state.unlocked){state.tab='vault';state.pinStage=HAS_PIN()?'enter':'set1';state.pinBuffer='';state.pendingSave=state.current;render();return;}
+    await promptLabelAndSave(state.current);
+  }
+  else if(a==='reveal'){state.revealed[btn.dataset.id]=!state.revealed[btn.dataset.id];render();}
+  else if(a==='copyEntry'){const en=state.entries.find(function(x){return x.id===btn.dataset.id;});if(en)copyText(en.pw,btn);}
+  else if(a==='delEntry'){
+    const en=state.entries.find(function(x){return x.id===btn.dataset.id;});
+    if(en&&confirm('¿Borrar la contraseña "'+(en.label||'')+'"?')){
+      state.entries=state.entries.filter(function(x){return x.id!==btn.dataset.id;});
+      await persistVault();render();
+    }
+  }
+  else if(a==='lockVault'){state.unlocked=false;state.key=null;state.entries=[];state.revealed={};state.tab='gen';render();}
+  else if(a==='startChangePin'){state.forcePin=true;state.pinStage='change_cur';state.pinBuffer='';state.pinMsg='';state.pinError=false;renderPinScreen();}
 });
+
+async function promptLabelAndSave(pw){
+  const label=prompt('¿Para qué es esta contraseña? (ej. Gmail, Instagram)');
+  if(label===null)return;
+  state.entries.unshift({id:uid(),label:(label.trim()||'Sin nombre'),pw:pw,created:Date.now()});
+  await persistVault();
+  state.current='';state.tab='vault';render();
+}
 
 render();
 </script>
